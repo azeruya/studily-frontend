@@ -1,27 +1,16 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-blue-100 p-5 relative overflow-hidden">
+  <div class="min-h-screen flex flex-col bg-gradient-to-br from-pink-100 via-purple-100 to-blue-100 p-5 relative overflow-hidden">
     <!-- Background floating shapes -->
     <FloatingShapes />
 
-    <!-- Header -->
-    <header class="text-center mb-10 z-10 relative">
-      <h1 class="text-5xl md:text-6xl font-extrabold text-pink-600 drop-shadow-glow mb-2 animate-bounce-slow">
-        🌸 Studily 🌸
-      </h1>
-      <p class="text-lg md:text-xl text-purple-700 font-medium italic">Your adorable study companion 🧠💖</p>
-    </header>
+    
 
     <!-- Main view -->
     <div class="z-10 relative">
       <StudyView />
     </div>
 
-    <!-- Notification popup -->
-    <NotificationComponent 
-      :show="showNotification" 
-      :message="notificationMessage" 
-      @close="showNotification = false"
-    />
+   
   </div>
 </template>
 

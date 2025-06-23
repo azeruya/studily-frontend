@@ -1,117 +1,122 @@
 <template>
-  <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-    <div class="lg:col-span-2">
-      <TimerComponent 
-        :current-pet="currentPet"
-        :time-left="timeLeft"
-        :is-running="isRunning"
-        :current-session="currentSession"
-        :session-types="sessionTypes"
-        :progress-percentage="progressPercentage"
-        @toggle-timer="toggleTimer"
-        @reset-timer="resetTimer"
-        @skip-session="skipSession"
-        @switch-session="switchSession"
-        @pet-interaction="petCharacter"
-      />
-    </div>
-    
-    <div class="space-y-6">
-      <StatsCard :stats="stats" />
-      <PetCollection 
-        :pets="pets" 
-        :current-pet-id="currentPetId"
-        @select-pet="selectPet"
-      />
-      <MotivationalQuote :quote="currentQuote" />
+  <div class="min-h-screen flex bg-pink-50">
+
+    <!-- Sidebar -->
+    <nav
+      class="flex flex-col items-center gap-6 py-6 px-2 bg-white/90 border border-pink-200 backdrop-blur-md shadow-2xl rounded-r-2xl fixed top-4 bottom-4 left-4 w-16"
+      role="navigation"
+    >
+      <button class="w-12 h-12 flex items-center justify-center rounded-xl hover:bg-pink-200 transition" title="Pets">
+        🐾
+      </button>
+
+      <button class="w-12 h-12 flex items-center justify-center rounded-xl hover:bg-pink-200 transition" title="Profile">
+        👤
+      </button>
+
+      <button class="w-12 h-12 flex items-center justify-center rounded-xl hover:bg-pink-200 transition" title="Analytics">
+        📊
+      </button>
+    </nav>
+
+    <!-- Main Content (with margin to prevent overlap) -->
+    <div class="flex-1 ml-24 p-6 max-w-7xl mx-auto flex flex-col lg:flex-row gap-6">
+
+      <!-- Left Column -->
+      <div
+        class="flex-1 flex items-center justify-center bg-cover bg-center rounded-2xl relative"
+        :style="{ backgroundImage: `url(/src/assets/bg/pink_cloud.JPG)` }"
+      >
+        <div class="max-w-md w-full">
+          <TimerComponent 
+            :time-left="timeLeft"
+            :is-running="isRunning"
+            :current-session="currentSession"
+            :session-types="sessionTypes"
+            :progress-percentage="progressPercentage"
+            @toggle-timer="toggleTimer"
+            @reset-timer="resetTimer"
+            @skip-session="skipSession"
+            @switch-session="switchSession"
+          />
+        </div>
+      </div>
+
+      <!-- Right Column -->
+      <div class="flex flex-1 flex-col gap-6">
+        <div class="pixel-card flex-1 overflow-auto">
+          <h2 class="pixel-title mb-4">📝 Tasks</h2>
+          <ul class="space-y-2">
+            <li v-for="task in tasks" :key="task.id" class="task-item">
+              <input 
+                type="checkbox" 
+                v-model="task.completed" 
+                class="pixel-checkbox" 
+              />
+              <span :class="{ 'line-through text-gray-400': task.completed }">{{ task.text }}</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="pixel-card flex-1 text-center flex flex-col items-center justify-center">
+          <h2 class="pixel-title mb-2">🐾 Equipped Pet</h2>
+          <img 
+            :src="currentPetImage" 
+            :alt="currentPet.name"
+            class="mx-auto w-48 h-48 object-contain drop-shadow-lg pixel animate-float"
+          />
+          <p class="text-lg font-bold text-pink-600 mt-2">{{ currentPet.name }}</p>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 import TimerComponent from '../components/TimerComponent.vue'
-import StatsCard from '../components/StatsCard.vue'
-import PetCollection from '../components/PetCollection.vue'
-import MotivationalQuote from '../components/MotivationalQuote.vue'
 
 export default {
   name: 'StudyView',
-  components: {
-    TimerComponent,
-    StatsCard,
-    PetCollection,
-    MotivationalQuote
-  },
+  components: { TimerComponent },
   data() {
     return {
-      // Timer state
       timeLeft: 25 * 60,
       isRunning: false,
       currentSession: 'pomodoro',
       timerInterval: null,
-      
-      // Session types
       sessionTypes: [
         { type: 'pomodoro', name: 'Study', duration: 25 * 60 },
         { type: 'shortBreak', name: 'Short Break', duration: 5 * 60 },
         { type: 'longBreak', name: 'Long Break', duration: 15 * 60 }
       ],
-      
-      // Stats
-      stats: {
-        streak: 7,
-        sessionsToday: 4,
-        studyTimeToday: 100,
-        totalSessions: 85
-      },
-      
-      // Pet collection
-      pets: [
-        { id: 1, name: 'Fluffy', icon: '🐱', unlocked: true, unlockRequirement: 0 },
-        { id: 2, name: 'Buddy', icon: '🐶', unlocked: true, unlockRequirement: 3 },
-        { id: 3, name: 'Nibbles', icon: '🐰', unlocked: false, unlockRequirement: 10 },
-        { id: 4, name: 'Squeaky', icon: '🐹', unlocked: false, unlockRequirement: 20 },
-        { id: 5, name: 'Shelly', icon: '🐢', unlocked: false, unlockRequirement: 30 },
-        { id: 6, name: 'Chirpy', icon: '🐦', unlocked: false, unlockRequirement: 50 }
+      tasks: [
+        { id: 1, text: "Finish Vue homework", completed: false },
+        { id: 2, text: "Read 1 chapter", completed: false },
+        { id: 3, text: "Pet the cat", completed: true },
       ],
-      
+      pets: [
+        { id: 1, name: 'Fluffy', icon: '🐱', image: '/src/assets/pets/pinky.png', unlocked: true },
+        { id: 2, name: 'Buddy', icon: '🐶', image: '/src/assets/pets/buddy.png', unlocked: true }
+      ],
       currentPetId: 1,
-      
-      // Motivational quotes
-      quotes: [
-        { text: "The expert in anything was once a beginner.", author: "Helen Hayes" },
-        { text: "Success is the sum of small efforts repeated day in and day out.", author: "Robert Collier" },
-        { text: "Don't watch the clock; do what it does. Keep going.", author: "Sam Levenson" },
-        { text: "The future depends on what you do today.", author: "Mahatma Gandhi" },
-        { text: "Study hard what interests you the most in the most undisciplined way.", author: "Richard Feynman" }
-      ]
     }
   },
-  
   computed: {
     currentPet() {
-      return this.pets.find(pet => pet.id === this.currentPetId) || this.pets[0]
+      return this.pets.find(pet => pet.id === this.currentPetId)
     },
-    
+    currentPetImage() {
+      return this.currentPet?.image || ''
+    },
     progressPercentage() {
-      const currentDuration = this.sessionTypes.find(s => s.type === this.currentSession).duration
-      return ((currentDuration - this.timeLeft) / currentDuration) * 100
-    },
-    
-    currentQuote() {
-      return this.quotes[Math.floor(Math.random() * this.quotes.length)]
+      const duration = this.sessionTypes.find(s => s.type === this.currentSession).duration
+      return ((duration - this.timeLeft) / duration) * 100
     }
   },
-  
   methods: {
     toggleTimer() {
-      if (this.isRunning) {
-        this.pauseTimer()
-      } else {
-        this.startTimer()
-      }
+      this.isRunning ? this.pauseTimer() : this.startTimer()
     },
-    
     startTimer() {
       this.isRunning = true
       this.timerInterval = setInterval(() => {
@@ -122,81 +127,28 @@ export default {
         }
       }, 1000)
     },
-    
     pauseTimer() {
       this.isRunning = false
-      if (this.timerInterval) {
-        clearInterval(this.timerInterval)
-      }
+      clearInterval(this.timerInterval)
     },
-    
     resetTimer() {
       this.pauseTimer()
-      const currentSessionType = this.sessionTypes.find(s => s.type === this.currentSession)
-      this.timeLeft = currentSessionType.duration
+      const session = this.sessionTypes.find(s => s.type === this.currentSession)
+      this.timeLeft = session.duration
     },
-    
-    switchSession(sessionType) {
+    switchSession(type) {
       this.pauseTimer()
-      this.currentSession = sessionType
-      const sessionData = this.sessionTypes.find(s => s.type === sessionType)
-      this.timeLeft = sessionData.duration
+      this.currentSession = type
+      this.timeLeft = this.sessionTypes.find(s => s.type === type).duration
     },
-    
     skipSession() {
       this.pauseTimer()
       this.completeSession()
     },
-    
     completeSession() {
       this.pauseTimer()
-      
-      if (this.currentSession === 'pomodoro') {
-        this.stats.sessionsToday++
-        this.stats.totalSessions++
-        this.stats.studyTimeToday += 25
-        this.checkPetUnlocks()
-      }
-      
-      this.$root.showNotification('Session completed! Great work! 🎉')
-      
-      if (this.currentSession === 'pomodoro') {
-        this.switchSession(this.stats.sessionsToday % 4 === 0 ? 'longBreak' : 'shortBreak')
-      } else {
-        this.switchSession('pomodoro')
-      }
-    },
-    
-    petCharacter() {
-      this.$root.showNotification(`${this.currentPet.name} is cheering you on! 🎉`)
-    },
-    
-    selectPet(pet) {
-      if (pet.unlocked) {
-        this.currentPetId = pet.id
-        this.$root.showNotification(`${pet.name} is now your study buddy! 🐾`)
-      } else {
-        this.$root.showNotification(`Reach a ${pet.unlockRequirement} day streak to unlock ${pet.name}!`)
-      }
-    },
-    
-    checkPetUnlocks() {
-      this.pets.forEach(pet => {
-        if (!pet.unlocked && this.stats.streak >= pet.unlockRequirement) {
-          pet.unlocked = true
-          this.$root.showNotification(`🎉 New pet unlocked: ${pet.name}! ${pet.icon}`)
-        }
-      })
-    }
-  },
-  
-  mounted() {
-    this.checkPetUnlocks()
-  },
-  
-  beforeUnmount() {
-    if (this.timerInterval) {
-      clearInterval(this.timerInterval)
+      this.$root.showNotification('Session complete!')
+      this.switchSession(this.currentSession === 'pomodoro' ? 'shortBreak' : 'pomodoro')
     }
   }
 }
