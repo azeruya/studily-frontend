@@ -88,32 +88,32 @@ export default {
   name: 'StudyView',
   components: { TimerComponent },
   data() {
-    return {
-      newTaskText: '',
-      timeLeft: 25 * 60,
-      isRunning: false,
-      currentSession: 'pomodoro',
-      timerInterval: null,
-      tasks: [],
-      pets: [
-        { id: 1, name: 'Fluffy', icon: '🐱', image: '/src/assets/pets/pinky.png', unlocked: true },
-        { id: 2, name: 'Buddy', icon: '🐶', image: '/src/assets/pets/buddy.png', unlocked: true }
-      ],
-      currentPetId: 1,
-      sessionTypes: [
-        { type: 'pomodoro', name: 'Study', duration: 25 * 60 },
-        { type: 'shortBreak', name: 'Short Break', duration: 5 * 60 },
-        { type: 'longBreak', name: 'Long Break', duration: 15 * 60 }
-      ]
-    }
-  },
+  return {
+    newTaskText: '',
+    timeLeft: 25 * 60,
+    isRunning: false,
+    currentSession: 'pomodoro',
+    timerInterval: null,
+    pomodoroStartTime: null, // ✅ this goes inside the returned object
+    tasks: [],
+    pets: [
+    ],
+    currentPetId: 1,
+    sessionTypes: [
+      { type: 'pomodoro', name: 'Study', duration: 25 * 60 },
+      { type: 'shortBreak', name: 'Short Break', duration: 5 * 60 },
+      { type: 'longBreak', name: 'Long Break', duration: 15 * 60 }
+    ]
+  }
+},
   computed: {
     currentPet() {
-      return this.pets.find(pet => pet.id === this.currentPetId)
-    },
-    currentPetImage() {
-      return this.currentPet?.image || ''
-    },
+  return this.pets.find(pet => pet.id === this.currentPetId) || { name: 'No Pet', image: '/src/assets/pets/default.png' }
+},
+currentPetImage() {
+  return this.currentPet.image || '/src/assets/pets/default.png'
+}
+,
     progressPercentage() {
       const duration = this.sessionTypes.find(s => s.type === this.currentSession).duration
       return ((duration - this.timeLeft) / duration) * 100
@@ -121,6 +121,7 @@ export default {
   },
   mounted() {
     this.fetchTasks()
+    this.fetchEquippedPet()
   },
   methods: {
     async fetchTasks() {
@@ -150,6 +151,48 @@ export default {
     console.error('Failed to fetch tasks:', err.response?.data || err.message)
   }
 },
+async fetchEquippedPet() {
+  const token = localStorage.getItem('token')
+
+  try {
+    const response = await axios.get('https://studily-backend.onrender.com/characters/equipped', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+
+    if (response.data && response.data.data) {
+      const pet = response.data.data
+      this.pets = [
+        {
+          id: pet.id,
+          name: pet.name,
+          image: pet.image_url || '/src/assets/pets/default.png' // fallback if needed
+        }
+      ]
+      this.currentPetId = pet.id
+    } else {
+      console.warn('No equipped pet found, using fallback.')
+      this.pets = [
+        {
+          id: 0,
+          name: 'No Pet',
+          image: '/src/assets/pets/default.png'
+        }
+      ]
+      this.currentPetId = 0
+    }
+  } catch (err) {
+    console.error('Failed to fetch equipped pet:', err)
+    this.pets = [
+      {
+        id: 0,
+        name: 'No Pet',
+        image: '/src/assets/pets/default.png'
+      }
+    ]
+    this.currentPetId = 0
+  }
+}
+,
 
     async addTask() {
       const token = localStorage.getItem('token')
@@ -207,15 +250,17 @@ export default {
       this.isRunning ? this.pauseTimer() : this.startTimer()
     },
     startTimer() {
-      this.isRunning = true
-      this.timerInterval = setInterval(() => {
-        if (this.timeLeft > 0) {
-          this.timeLeft--
-        } else {
-          this.completeSession()
-        }
-      }, 1000)
-    },
+  this.isRunning = true
+  this.pomodoroStartTime = new Date().toISOString()
+  this.timerInterval = setInterval(() => {
+    if (this.timeLeft > 0) {
+      this.timeLeft--
+    } else {
+      this.completeSession()
+    }
+  }, 1000)
+}
+,
     pauseTimer() {
       this.isRunning = false
       clearInterval(this.timerInterval)
@@ -234,11 +279,37 @@ export default {
       this.pauseTimer()
       this.completeSession()
     },
-    completeSession() {
-      this.pauseTimer()
-      this.$root.showNotification('Session complete!')
-      this.switchSession(this.currentSession === 'pomodoro' ? 'shortBreak' : 'pomodoro')
-    }
+    async completeSession() {
+  this.pauseTimer()
+  this.$root.showNotification('Session complete!')
+
+  const token = localStorage.getItem('token')
+  const now = new Date()
+  const endTime = now.toISOString()
+
+  try {
+    // 1. Log study
+    const res = await axios.post('https://studily-backend.onrender.com/study/log', {}, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    console.log('Study logged:', res.data)
+
+    // Optional 2. Log Pomodoro session
+    await axios.post('https://studily-backend.onrender.com/pomodoro/session', {
+      start_time: this.pomodoroStartTime,
+      end_time: endTime,
+      is_completed: true
+    }, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    console.log('Pomodoro session logged')
+  } catch (err) {
+    console.error('Failed to log session:', err.response?.data || err.message)
+  }
+
+  this.switchSession(this.currentSession === 'pomodoro' ? 'shortBreak' : 'pomodoro')
+}
+
   }
 }
 </script>

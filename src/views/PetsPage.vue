@@ -28,31 +28,77 @@
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
   name: 'PetsPage',
   data() {
     return {
-      pets: [
-        { id: 1, name: 'Axolotl', icon: '🐱', image: '/src/assets/pets/pinky.png', unlocked: true },
-        { id: 2, name: 'Penguin', icon: '🐶', image: '/src/assets/pets/penguin.png', unlocked: true },
-        { id: 3, name: 'Yeti', icon: '🐦', image: '/src/assets/pets/yeti.png', unlocked: false }, 
-        { id: 3, name: 'Fox', icon: '🐦', image: '/src/assets/pets/fox.png', unlocked: false }, 
-        { id: 3, name: 'Chinchilla', icon: '🐦', image: '/src/assets/pets/chinchilla.png', unlocked: false }, 
-      ],
-      currentPetId: 1,
+      pets: [],
+      currentPetId: null
     }
   },
+  async mounted() {
+    await this.fetchPets()
+  },
   methods: {
-    selectPet(petId) {
-      const pet = this.pets.find(p => p.id === petId)
-      if (!pet || !pet.unlocked) return
+    async fetchPets() {
+      const token = localStorage.getItem('token')
+      try {
+        const [allRes, unlockedRes, equippedRes] = await Promise.all([
+          axios.get('https://studily-backend.onrender.com/characters/all', {
+            headers: { Authorization: `Bearer ${token}` }
+          }),
+          axios.get('https://studily-backend.onrender.com/characters/unlocked', {
+            headers: { Authorization: `Bearer ${token}` }
+          }),
+          axios.get('https://studily-backend.onrender.com/characters/equipped', {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+        ])
 
-      this.currentPetId = petId
-      this.$root.showNotification(`Equipped ${pet.name}!`)
-    }
+        const unlockedIds = unlockedRes.data.data.map(c => c.id)
+        const equippedId = equippedRes.data.data?.id
+
+        this.pets = allRes.data.data.map(pet => ({
+          id: pet.id,
+          name: pet.name,
+          image: `/${pet.image_url.replace(/^public\//, '')}`, // clean up path
+          unlocked: unlockedIds.includes(pet.id)
+        }))
+
+        this.currentPetId = equippedId
+
+      } catch (err) {
+        console.error('Failed to load pets:', err)
+        this.$root.showNotification('Failed to load pets')
+      }
+    },
+
+    async selectPet(petId) {
+  const token = localStorage.getItem('token')
+  const pet = this.pets.find(p => p.id === petId)
+  if (!pet || !pet.unlocked) return
+
+  try {
+    await axios.post(`https://studily-backend.onrender.com/characters/equip/${petId}`, {}, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+
+    this.currentPetId = petId
+    this.$root.showNotification(`Equipped ${pet.name}!`)
+  } catch (err) {
+    console.error('Failed to equip pet:', err)
+    this.$root.showNotification('Failed to equip pet.')
+  }
+}
+
   }
 }
 </script>
+
 
 <style scoped>
 .pixel-card {
