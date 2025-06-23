@@ -1,74 +1,53 @@
 <template>
-  <div class="min-h-screen flex bg-pink-50">
+  <div class="min-h-screen flex bg-pink-50 p-6 max-w-7xl mx-auto flex flex-col lg:flex-row gap-6">
 
-    <!-- Sidebar -->
-    <nav
-      class="flex flex-col items-center gap-6 py-6 px-2 bg-white/90 border border-pink-200 backdrop-blur-md shadow-2xl rounded-r-2xl fixed top-4 bottom-4 left-4 w-16"
-      role="navigation"
+    <!-- Left Column -->
+    <div
+      class="flex-1 flex items-center justify-center bg-cover bg-center rounded-2xl relative"
+      :style="{ backgroundImage: `url(/src/assets/bg/pink_cloud.JPG)` }"
     >
-      <button class="w-12 h-12 flex items-center justify-center rounded-xl hover:bg-pink-200 transition" title="Pets">
-        🐾
-      </button>
-
-      <button class="w-12 h-12 flex items-center justify-center rounded-xl hover:bg-pink-200 transition" title="Profile">
-        👤
-      </button>
-
-      <button class="w-12 h-12 flex items-center justify-center rounded-xl hover:bg-pink-200 transition" title="Analytics">
-        📊
-      </button>
-    </nav>
-
-    <!-- Main Content (with margin to prevent overlap) -->
-    <div class="flex-1 ml-24 p-6 max-w-7xl mx-auto flex flex-col lg:flex-row gap-6">
-
-      <!-- Left Column -->
-      <div
-        class="flex-1 flex items-center justify-center bg-cover bg-center rounded-2xl relative"
-        :style="{ backgroundImage: `url(/src/assets/bg/pink_cloud.JPG)` }"
-      >
-        <div class="max-w-md w-full">
-          <TimerComponent 
-            :time-left="timeLeft"
-            :is-running="isRunning"
-            :current-session="currentSession"
-            :session-types="sessionTypes"
-            :progress-percentage="progressPercentage"
-            @toggle-timer="toggleTimer"
-            @reset-timer="resetTimer"
-            @skip-session="skipSession"
-            @switch-session="switchSession"
-          />
-        </div>
-      </div>
-
-      <!-- Right Column -->
-      <div class="flex flex-1 flex-col gap-6">
-        <div class="pixel-card flex-1 overflow-auto">
-          <h2 class="pixel-title mb-4">📝 Tasks</h2>
-          <ul class="space-y-2">
-            <li v-for="task in tasks" :key="task.id" class="task-item">
-              <input 
-                type="checkbox" 
-                v-model="task.completed" 
-                class="pixel-checkbox" 
-              />
-              <span :class="{ 'line-through text-gray-400': task.completed }">{{ task.text }}</span>
-            </li>
-          </ul>
-        </div>
-
-        <div class="pixel-card flex-1 text-center flex flex-col items-center justify-center">
-          <h2 class="pixel-title mb-2">🐾 Equipped Pet</h2>
-          <img 
-            :src="currentPetImage" 
-            :alt="currentPet.name"
-            class="mx-auto w-48 h-48 object-contain drop-shadow-lg pixel animate-float"
-          />
-          <p class="text-lg font-bold text-pink-600 mt-2">{{ currentPet.name }}</p>
-        </div>
+      <div class="max-w-md w-full">
+        <TimerComponent 
+          :time-left="timeLeft"
+          :is-running="isRunning"
+          :current-session="currentSession"
+          :session-types="sessionTypes"
+          :progress-percentage="progressPercentage"
+          @toggle-timer="toggleTimer"
+          @reset-timer="resetTimer"
+          @skip-session="skipSession"
+          @switch-session="switchSession"
+        />
       </div>
     </div>
+
+    <!-- Right Column -->
+    <div class="flex flex-1 flex-col gap-6">
+      <div class="pixel-card flex-1 overflow-auto">
+        <h2 class="pixel-title mb-4">📝 Tasks</h2>
+        <ul class="space-y-2">
+          <li v-for="task in tasks" :key="task.id" class="task-item">
+            <input 
+              type="checkbox" 
+              v-model="task.completed" 
+              class="pixel-checkbox" 
+            />
+            <span :class="{ 'line-through text-gray-400': task.completed }">{{ task.text }}</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="pixel-card flex-1 text-center flex flex-col items-center justify-center">
+        <h2 class="pixel-title mb-2">🐾 Equipped Pet</h2>
+        <img 
+          :src="currentPetImage" 
+          :alt="currentPet.name"
+          class="mx-auto w-48 h-48 object-contain drop-shadow-lg pixel animate-float"
+        />
+        <p class="text-lg font-bold text-pink-600 mt-2">{{ currentPet.name }}</p>
+      </div>
+    </div>
+
   </div>
 </template>
 

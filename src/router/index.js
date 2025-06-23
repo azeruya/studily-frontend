@@ -1,23 +1,23 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import HomeView from '../views/HomeView.vue';
-import LoginView from '../views/LoginView.vue';
-import RegisterView from '../views/RegisterView.vue';
-import PetsPage from '@/views/PetsPage.vue'
-import ProfilePage from '@/views/ProfilePage.vue'
-import AnalyticsPage from '@/views/AnalyticsPage.vue'
+import { createRouter, createWebHistory } from 'vue-router'
+import StudyView from '../views/StudyView.vue'
+import PetsPage from '../views/PetsPage.vue'
+import ProfilePage from '../views/ProfilePage.vue'
+import AnalyticsPage from '../views/AnalyticsPage.vue'
+import LoginView from '@/views/LoginView.vue'
+import RegisterView from '@/views/RegisterView.vue'
 
 const routes = [
-  { path: '/', component: HomeView },
-  { path: '/login', component: LoginView },
-  { path: '/register', component: RegisterView },
+  { path: '/', component: StudyView },  // <-- load StudyView on home '/'
   { path: '/pets', component: PetsPage },
   { path: '/profile', component: ProfilePage },
   { path: '/analytics', component: AnalyticsPage },
-];
+  { path: '/login', component: LoginView },
+  { path: '/register', component: RegisterView },
+]
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
-});
+  routes,
+})
 
-export default router;
+export default router

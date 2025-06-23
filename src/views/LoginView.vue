@@ -1,33 +1,58 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-100 to-blue-100">
-    <div class="bg-white shadow-lg rounded-3xl p-8 max-w-md w-full border border-purple-200">
-      <h2 class="text-2xl font-bold text-center text-purple-600 mb-4">🌈 Welcome Back!</h2>
-      <p class="text-center text-gray-500 mb-6">Log in to keep your pet happy!</p>
-
-      <form @submit.prevent="handleLogin" class="space-y-4">
-        <input v-model="email" type="email" placeholder="Email"
-          class="w-full p-3 border border-purple-300 rounded-xl bg-purple-100 placeholder-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400" />
-        <input v-model="password" type="password" placeholder="Password"
-          class="w-full p-3 border border-purple-300 rounded-xl bg-purple-100 placeholder-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400" />
-        <button type="submit"
-          class="w-full py-3 bg-purple-400 text-white font-semibold rounded-xl hover:bg-purple-500 transition">Login 🧸</button>
+  <div class="min-h-screen flex items-center justify-center bg-pink-50">
+    <div class="pixel-card w-full max-w-md p-8 shadow-xl">
+      <h2 class="pixel-title text-center mb-6">🔐 Login</h2>
+      <form @submit.prevent="login">
+        <div class="mb-4">
+          <label class="block text-pink-600 font-semibold mb-1">Email</label>
+          <input
+            v-model="email"
+            type="email"
+            required
+            class="w-full p-3 rounded-xl border border-pink-300 focus:outline-pink-400"
+          />
+        </div>
+        <div class="mb-6">
+          <label class="block text-pink-600 font-semibold mb-1">Password</label>
+          <input
+            v-model="password"
+            type="password"
+            required
+            class="w-full p-3 rounded-xl border border-pink-300 focus:outline-pink-400"
+          />
+        </div>
+        <button
+          type="submit"
+          class="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-xl transition"
+        >
+          Login
+        </button>
       </form>
-
-      <p class="text-center text-sm mt-4 text-purple-500">
-        New here?
-        <RouterLink to="/register" class="underline hover:text-purple-600">Create an account</RouterLink>
+      <p class="text-center mt-4 text-sm text-pink-600">
+        Don’t have an account?
+        <router-link to="/register" class="underline hover:text-pink-800">Register</router-link>
       </p>
     </div>
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue'
-
-const email = ref('')
-const password = ref('')
-
-function handleLogin() {
-  console.log('Logging in:', email.value, password.value)
+<script>
+export default {
+  name: 'LoginView',
+  data() {
+    return {
+      email: '',
+      password: ''
+    }
+  },
+  methods: {
+    login() {
+      // Replace with real auth logic
+      if (this.email && this.password) {
+        this.$router.push('/'); // Navigate to home after login
+        this.$root.showNotification('Welcome back! 🎉');
+      }
+    }
+  }
 }
 </script>
