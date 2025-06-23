@@ -7,10 +7,10 @@ import LoginView from '@/views/LoginView.vue'
 import RegisterView from '@/views/RegisterView.vue'
 
 const routes = [
-  { path: '/', component: StudyView },  // <-- load StudyView on home '/'
-  { path: '/pets', component: PetsPage },
-  { path: '/profile', component: ProfilePage },
-  { path: '/analytics', component: AnalyticsPage },
+  { path: '/', component: StudyView, meta: { requiresAuth: true } },
+  { path: '/pets', component: PetsPage, meta: { requiresAuth: true } },
+  { path: '/profile', component: ProfilePage, meta: { requiresAuth: true } },
+  { path: '/analytics', component: AnalyticsPage, meta: { requiresAuth: true } },
   { path: '/login', component: LoginView },
   { path: '/register', component: RegisterView },
 ]
