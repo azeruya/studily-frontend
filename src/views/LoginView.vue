@@ -38,7 +38,8 @@
 </template>
 
 <script>
-import AuthService from '../services/AuthService'
+import AuthService from '@/services/AuthService'
+import axios from 'axios'
 
 export default {
   name: 'LoginView',
@@ -52,13 +53,12 @@ export default {
   methods: {
     async login() {
       try {
-        await authService.login({
-          email: this.email,
-          password: this.password
-        })
-
+        const data = await AuthService.login(this.email, this.password)
+        if (data.token) {
+          localStorage.setItem('token', data.token)
+          axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`
+        }
         this.$router.push('/')
-        this.$root.showNotification('Welcome back! 🎉')
       } catch (err) {
         this.error = err.response?.data?.message || 'Login failed.'
       }
@@ -66,4 +66,5 @@ export default {
   }
 }
 </script>
+
 

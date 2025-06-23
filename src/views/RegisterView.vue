@@ -47,7 +47,7 @@
 </template>
 
 <script>
-import authService from '@/services/authService'
+import AuthService from '@/services/AuthService'
 
 export default {
   name: 'RegisterView',
@@ -62,14 +62,8 @@ export default {
   methods: {
     async register() {
       try {
-        await authService.register({
-          name: this.name,
-          email: this.email,
-          password: this.password
-        })
-
+        await AuthService.register(this.name, this.email, this.password)
         this.$router.push('/login')
-        this.$root.showNotification('Account created! Please log in.')
       } catch (err) {
         this.error = err.response?.data?.message || 'Registration failed.'
       }
@@ -77,4 +71,5 @@ export default {
   }
 }
 </script>
+
 
