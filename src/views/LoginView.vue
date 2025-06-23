@@ -3,6 +3,7 @@
     <div class="pixel-card w-full max-w-md p-8 shadow-xl">
       <h2 class="pixel-title text-center mb-6">🔐 Login</h2>
       <form @submit.prevent="login">
+        <p class="text-red-500 mt-3 text-center" v-if="error">{{ error }}</p>
         <div class="mb-4">
           <label class="block text-pink-600 font-semibold mb-1">Email</label>
           <input
@@ -37,22 +38,32 @@
 </template>
 
 <script>
+import AuthService from '../services/AuthService'
+
 export default {
   name: 'LoginView',
   data() {
     return {
       email: '',
-      password: ''
+      password: '',
+      error: ''
     }
   },
   methods: {
-    login() {
-      // Replace with real auth logic
-      if (this.email && this.password) {
-        this.$router.push('/'); // Navigate to home after login
-        this.$root.showNotification('Welcome back! 🎉');
+    async login() {
+      try {
+        await authService.login({
+          email: this.email,
+          password: this.password
+        })
+
+        this.$router.push('/')
+        this.$root.showNotification('Welcome back! 🎉')
+      } catch (err) {
+        this.error = err.response?.data?.message || 'Login failed.'
       }
     }
   }
 }
 </script>
+

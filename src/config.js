@@ -1,2 +1,6 @@
 // src/config.js
-export const API_BASE_URL = "https://studily-backend.onrender.com";
+const config = {
+  apiBaseUrl: 'https://studily-backend.onrender.com' // or your backend URL
+}
+
+export default config

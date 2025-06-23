@@ -3,6 +3,7 @@
     <div class="pixel-card w-full max-w-md p-8 shadow-xl">
       <h2 class="pixel-title text-center mb-6">📝 Register</h2>
       <form @submit.prevent="register">
+        <p class="text-red-500 mt-3 text-center" v-if="error">{{ error }}</p>
         <div class="mb-4">
           <label class="block text-purple-600 font-semibold mb-1">Name</label>
           <input
@@ -46,23 +47,34 @@
 </template>
 
 <script>
+import authService from '@/services/authService'
+
 export default {
   name: 'RegisterView',
   data() {
     return {
       name: '',
       email: '',
-      password: ''
+      password: '',
+      error: ''
     }
   },
   methods: {
-    register() {
-      // Replace with real registration logic
-      if (this.name && this.email && this.password) {
-        this.$router.push('/login');
-        this.$root.showNotification('Account created! Please log in.');
+    async register() {
+      try {
+        await authService.register({
+          name: this.name,
+          email: this.email,
+          password: this.password
+        })
+
+        this.$router.push('/login')
+        this.$root.showNotification('Account created! Please log in.')
+      } catch (err) {
+        this.error = err.response?.data?.message || 'Registration failed.'
       }
     }
   }
 }
 </script>
+

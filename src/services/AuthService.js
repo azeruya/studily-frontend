@@ -1,20 +1,24 @@
 // src/services/AuthService.js
-import { API_BASE_URL } from '../config';
+import axios from 'axios'
+import config from '../config'
 
-export async function register(userData) {
-  const res = await fetch(`${API_BASE_URL}/auth/register`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(userData),
-  });
-  return res.json();
+const AuthService = {
+  async login(email, password) {
+    const response = await axios.post(`${config.apiBaseUrl}/auth/login`, {
+      email,
+      password
+    })
+    return response.data
+  },
+
+  async register(name, email, password) {
+    const response = await axios.post(`${config.apiBaseUrl}/auth/register`, {
+      name,
+      email,
+      password
+    })
+    return response.data
+  }
 }
 
-export async function login(credentials) {
-  const res = await fetch(`${API_BASE_URL}/auth/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(credentials),
-  });
-  return res.json();
-}
+export default AuthService
