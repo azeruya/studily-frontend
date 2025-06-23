@@ -1,85 +1,77 @@
-<script setup>
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
-</script>
-
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
+  <div class="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-blue-100 p-5 relative overflow-hidden">
+    <!-- Background floating shapes -->
+    <FloatingShapes />
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
+    <!-- Header -->
+    <header class="text-center mb-10 z-10 relative">
+      <h1 class="text-5xl md:text-6xl font-extrabold text-pink-600 drop-shadow-glow mb-2 animate-bounce-slow">
+        🌸 Studily 🌸
+      </h1>
+      <p class="text-lg md:text-xl text-purple-700 font-medium italic">Your adorable study companion 🧠💖</p>
+    </header>
 
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
+    <!-- Main view -->
+    <div class="z-10 relative">
+      <StudyView />
     </div>
-  </header>
 
-  <RouterView />
+    <!-- Notification popup -->
+    <NotificationComponent 
+      :show="showNotification" 
+      :message="notificationMessage" 
+      @close="showNotification = false"
+    />
+  </div>
 </template>
 
+<script>
+import StudyView from './views/StudyView.vue'
+import FloatingShapes from './components/FloatingShapes.vue'
+import NotificationComponent from './components/NotificationComponent.vue'
+
+export default {
+  name: 'App',
+  components: {
+    StudyView,
+    FloatingShapes,
+    NotificationComponent
+  },
+  data() {
+    return {
+      showNotification: false,
+      notificationMessage: ''
+    }
+  },
+  mounted() {
+    // Global notification handler
+    this.$root.showNotification = (message) => {
+      this.notificationMessage = message
+      this.showNotification = true
+      setTimeout(() => {
+        this.showNotification = false
+      }, 3000)
+    }
+  }
+}
+</script>
+
 <style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
+/* Soft glowing title */
+.drop-shadow-glow {
+  text-shadow: 0 0 8px rgba(255, 192, 203, 0.6), 0 0 15px rgba(255, 182, 193, 0.4);
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
-}
-
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-  border: 0;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
+/* Cute slow bounce animation */
+@keyframes bounce-slow {
+  0%, 100% {
+    transform: translateY(0);
   }
-
-  .logo {
-    margin: 0 2rem 0 0;
+  50% {
+    transform: translateY(-6px);
   }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
+}
+.animate-bounce-slow {
+  animation: bounce-slow 3s infinite;
 }
 </style>

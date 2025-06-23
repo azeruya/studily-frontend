@@ -1,15 +1,12 @@
 <template>
-  <div class="about">
-    <h1>This is an about page</h1>
+  <div class="min-h-screen flex items-center justify-center bg-pastelYellow">
+    <div class="text-center max-w-md">
+      <h2 class="text-3xl font-bold text-yellow-600 mb-2">About the App 🧠</h2>
+      <p class="text-yellow-700">
+        Study Pet is a gamified Pomodoro app that rewards your consistency with adorable pets!
+      </p>
+    </div>
   </div>
 </template>
 
-<style>
-@media (min-width: 1024px) {
-  .about {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-  }
-}
-</style>
+<script setup></script>
