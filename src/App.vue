@@ -46,9 +46,8 @@
     <NotificationComponent v-if="showNotification" :message="notificationMessage" />
   </div>
 </template>
-
 <script>
-import { useRouter } from 'vue-router'
+import axios from 'axios'
 import FloatingShapes from './components/FloatingShapes.vue'
 import NotificationComponent from './components/NotificationComponent.vue'
 
@@ -76,9 +75,10 @@ export default {
   },
   methods: {
     logout() {
-      // Optional: Clear localStorage/sessionStorage if you use it
-      // localStorage.removeItem('token')
-      this.$router.push('/login')
+      localStorage.removeItem('token');
+      delete axios.defaults.headers.common['Authorization'];
+      this.$router.push('/login');
+      this.$root.showNotification('You have been logged out.');
     }
   }
 }

@@ -52,16 +52,16 @@ export default {
   },
   methods: {
     async login() {
-      try {
-        const data = await AuthService.login(this.email, this.password)
-        if (data.token) {
-          localStorage.setItem('token', data.token)
-          axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`
-        }
-        this.$router.push('/')
-      } catch (err) {
-        this.error = err.response?.data?.message || 'Login failed.'
-      }
+    try {
+        const response = await AuthService.login(this.email, this.password);
+        const token = response.data.token;
+        console.log('Token received:', token);
+        localStorage.setItem('token', token);
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        this.$router.push('/');
+    } catch (err) {
+        this.error = err.response?.data?.message || 'Login failed.';
+    }
     }
   }
 }
