@@ -1,5 +1,13 @@
 <template>
-  <div class="min-h-screen flex bg-pink-50 p-6 max-w-7xl mx-auto flex flex-col lg:flex-row gap-6">
+  <div v-if="loading" class="flex flex-col items-center justify-center py-20 text-pink-500">
+    <svg class="animate-spin h-12 w-12 text-pink-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+      <path class="opacity-75" fill="currentColor"
+        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+    </svg>
+    <p class="text-lg">Loading your study page...</p>
+  </div>
+  <div v-else class="min-h-screen flex bg-pink-50 p-6 max-w-7xl mx-auto flex flex-col lg:flex-row gap-6">
 
     <!-- Left Column -->
     <div
@@ -80,6 +88,7 @@
 
   </div>
 </template>
+
 <script>
 import axios from 'axios'
 import TimerComponent from '../components/TimerComponent.vue'
@@ -89,6 +98,7 @@ export default {
   components: { TimerComponent },
   data() {
   return {
+    loading: true,
     newTaskText: '',
     timeLeft: 25 * 60,
     isRunning: false,
@@ -120,10 +130,18 @@ currentPetImage() {
     }
   },
   mounted() {
-    this.fetchTasks()
-    this.fetchEquippedPet()
-  },
+  this.init()
+},
+
   methods: {
+  async init() {
+    this.loading = true
+    await Promise.all([
+      this.fetchTasks(),
+      this.fetchEquippedPet()
+    ])
+    this.loading = false
+  },
     async fetchTasks() {
   const token = localStorage.getItem('token')
   console.log('Fetching tasks with token:', token)
@@ -150,6 +168,8 @@ currentPetImage() {
   } catch (err) {
     console.error('Failed to fetch tasks:', err.response?.data || err.message)
   }
+  this.loading = false
+
 },
 async fetchEquippedPet() {
   const token = localStorage.getItem('token')
@@ -165,7 +185,7 @@ async fetchEquippedPet() {
         {
           id: pet.id,
           name: pet.name,
-          image: pet.image_url || '/src/assets/pets/default.png' // fallback if needed
+          image: `/${pet.image_url.replace(/^public\//, '')}`
         }
       ]
       this.currentPetId = pet.id
@@ -191,8 +211,9 @@ async fetchEquippedPet() {
     ]
     this.currentPetId = 0
   }
-}
-,
+  this.loading = false
+
+},
 
     async addTask() {
       const token = localStorage.getItem('token')

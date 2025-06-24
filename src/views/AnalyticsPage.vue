@@ -1,10 +1,15 @@
 <template>
-  <div class="min-h-screen flex bg-pink-50">
+  <div class="min-h-screen flex bg-pink-50 relative">
     <!-- Sidebar space -->
     <div class="w-20"></div>
 
+    <!-- Loading Spinner -->
+    <div v-if="isLoading" class="absolute inset-0 flex justify-center items-center bg-white/70 z-50">
+      <div class="w-16 h-16 border-4 border-pink-300 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+
     <!-- Analytics Content -->
-    <div class="flex-1 p-6 max-w-6xl mx-auto flex flex-col gap-6">
+    <div class="flex-1 p-6 max-w-6xl mx-auto flex flex-col gap-6" v-if="!isLoading">
       <div class="pixel-card p-6">
         <h2 class="pixel-title mb-4">📊 Study Summary</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -53,28 +58,97 @@
 </template>
 
 <script>
+import axios from 'axios'
+import dayjs from 'dayjs'
+import isoWeek from 'dayjs/plugin/isoWeek'
+import isBetween from 'dayjs/plugin/isBetween'
+
+dayjs.extend(isoWeek)
+dayjs.extend(isBetween)
+
 export default {
   name: 'AnalyticsPage',
   data() {
     return {
+      isLoading: true, // 👈 Spinner state
       stats: {
-        totalSessions: 35,
-        totalMinutes: 875,
-        streak: 5
+        totalSessions: 0,
+        totalMinutes: 0,
+        streak: 0
       },
-      weekly: [
-        { label: 'Mon', minutes: 60 },
-        { label: 'Tue', minutes: 120 },
-        { label: 'Wed', minutes: 90 },
-        { label: 'Thu', minutes: 30 },
-        { label: 'Fri', minutes: 0 },
-        { label: 'Sat', minutes: 45 },
-        { label: 'Sun', minutes: 0 }
-      ],
+      weekly: [],
       mostActiveTask: {
-        name: 'Vue Homework',
-        minutes: 240
+        name: '',
+        minutes: 0
       }
+    }
+  },
+  async mounted() {
+    const token = localStorage.getItem('token')
+    try {
+      const [sessionsRes, userRes] = await Promise.all([
+        axios.get('https://studily-backend.onrender.com/pomodoro/sessions', {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        axios.get('https://studily-backend.onrender.com/me', {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+      ])
+
+      const sessions = sessionsRes.data.data
+      const user = userRes.data.data
+
+      const now = dayjs()
+      const startOfWeek = now.startOf('week')
+      const endOfWeek = now.endOf('week')
+
+      const weeklyLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+      const weeklyMap = [0, 0, 0, 0, 0, 0, 0]
+      let totalMinutes = 0
+
+      sessions.forEach(session => {
+        const start = dayjs(session.start_time)
+        const end = dayjs(session.end_time)
+        const duration = end.diff(start, 'minute')
+        const studyDate = dayjs(session.study_date)
+
+        console.log(
+          'Session date:', session.study_date,
+          '| Parsed:', studyDate.format(),
+          '| Between startOfWeek and endOfWeek?',
+          studyDate.isBetween(startOfWeek, endOfWeek, null, '[]')
+        )
+
+        if (studyDate.isBetween(startOfWeek, endOfWeek, null, '[]')) {
+          const dayIndex = studyDate.day()
+          weeklyMap[dayIndex] += duration
+        }
+
+        totalMinutes += duration
+      })
+
+      this.weekly = weeklyLabels.map((label, i) => ({
+        label,
+        minutes: weeklyMap[i]
+      }))
+
+      const mostActive = this.weekly.reduce((a, b) => (b.minutes > a.minutes ? b : a), { label: '', minutes: 0 })
+      this.mostActiveTask = {
+        name: mostActive.label,
+        minutes: mostActive.minutes
+      }
+
+      this.stats = {
+        totalSessions: sessions.length,
+        totalMinutes,
+        streak: user.current_streak
+      }
+
+    } catch (err) {
+      console.error('Failed to fetch analytics:', err)
+      this.$root.showNotification('Failed to load analytics data.')
+    } finally {
+      this.isLoading = false // ✅ Hide spinner
     }
   },
   methods: {

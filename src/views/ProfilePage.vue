@@ -11,7 +11,7 @@
           alt="Profile Avatar"
           class="w-32 h-32 rounded-full object-cover border-4 border-pink-200 shadow-xl mb-4"
         />
-        <h2 class="text-2xl font-bold text-pink-600 drop-shadow-glow">{{ user.username }}</h2>
+        <h2 class="text-2xl font-bold text-pink-600 drop-shadow-glow">{{ user.name }}</h2>
         <p class="text-gray-600">{{ user.role }}</p>
       </div>
 
@@ -52,27 +52,69 @@
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
   name: 'ProfilePage',
   data() {
     return {
       user: {
-        username: 'study_bunny',
-        name: 'Fathiya Azelya',
-        email: 'fathiya@example.com',
-        role: 'Student',
-        avatar: '/src/assets/pets/pinky.png' // you can change this to any pet image
-      }
+        name: '',
+        email: '',
+        avatar: '',       // from equipped_character.image_url
+        current_streak: 0 // optional, show on UI
+      },
+      loading: true
     }
   },
+  async mounted() {
+    await this.fetchUserProfile()
+  },
   methods: {
-    updateProfile() {
-      this.$root.showNotification('Profile updated!')
-      // You can later hook this to an API or storage
+    async fetchUserProfile() {
+      const token = localStorage.getItem('token')
+      try {
+        const res = await axios.get('https://studily-backend.onrender.com/me', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+
+        const data = res.data.data
+        this.user = {
+          name: data.name,
+          email: data.email,
+          avatar: `/${data.equipped_character?.image_url?.replace(/^public\//, '') || 'pets/default.png'}`,
+          current_streak: data.current_streak || 0
+        }
+
+        this.loading = false
+      } catch (err) {
+        console.error('Failed to load profile:', err)
+        this.$root.showNotification('Failed to load profile')
+      }
+    },
+
+    async updateProfile() {
+      const token = localStorage.getItem('token')
+      try {
+        await axios.put('https://studily-backend.onrender.com/users/me', {
+          name: this.user.name,
+          email: this.user.email
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+
+        this.$root.showNotification('Profile updated!')
+      } catch (err) {
+        console.error('Failed to update profile:', err)
+        this.$root.showNotification('Failed to update profile')
+      }
     }
   }
 }
 </script>
+
 
 <style scoped>
 .pixel-input {
