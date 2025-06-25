@@ -12,7 +12,7 @@
     <!-- Left Column -->
     <div
       class="flex-1 flex items-center justify-center bg-cover bg-center rounded-2xl relative"
-      :style="{ backgroundImage: `url(/src/assets/bg/pink_cloud.JPG)` }"
+      :style="{ backgroundImage: `url(/bg/pink_cloud.JPG)` }"
     >
       <div class="max-w-md w-full">
         <TimerComponent 
