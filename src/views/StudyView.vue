@@ -49,30 +49,29 @@
         </button>
         </form>
         <ul class="space-y-2">
-  <li
-    v-for="task in tasks"
-    :key="task.id"
-    class="task-item flex items-center justify-between"
-  >
-    <label class="flex items-center gap-2">
-      <input 
-        type="checkbox" 
-        v-model="task.completed" 
-        @change="toggleComplete(task)"
-        class="pixel-checkbox"
-      />
-      <span :class="{ 'line-through text-gray-400': task.completed }">{{ task.text }}</span>
-    </label>
-    <button
-      @click="deleteTask(task.id)"
-      class="text-red-500 hover:text-red-700 text-xl"
-      title="Delete task"
-    >
-      🗑️
-    </button>
-  </li>
-</ul>
-
+        <li
+          v-for="task in tasks"
+          :key="task.id"
+          class="task-item flex items-center justify-between"
+        >
+          <label class="flex items-center gap-2">
+            <input 
+              type="checkbox" 
+              v-model="task.completed" 
+              @change="toggleComplete(task)"
+              class="pixel-checkbox"
+            />
+            <span :class="{ 'line-through text-gray-400': task.completed }">{{ task.text }}</span>
+          </label>
+          <button
+            @click="deleteTask(task.id)"
+            class="text-red-500 hover:text-red-700 text-xl"
+            title="Delete task"
+          >
+            🗑️
+          </button>
+        </li>
+      </ul>
       </div>
 
       <div class="pixel-card flex-1 text-center flex flex-col items-center justify-center">
@@ -80,13 +79,29 @@
         <img 
           :src="currentPetImage" 
           :alt="currentPet.name"
-          class="mx-auto w-48 h-48 object-contain drop-shadow-lg pixel animate-float"
+          class="mx-auto w-48 h-48 object-contain drop-shadow-lg pixel animate-float cursor-pointer"
+          @click="showAffirmation"
         />
         <p class="text-lg font-bold text-pink-600 mt-2">{{ currentPet.name }}</p>
       </div>
     </div>
-
   </div>
+  <div 
+  v-if="showQuote"
+  class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+  @click.self="showQuote = false"
+>
+  <div class="bg-white p-6 rounded-xl shadow-xl max-w-sm text-center text-pink-600">
+    <p class="text-lg font-semibold">{{ selectedQuote }}</p>
+    <button 
+      class="mt-4 px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600"
+      @click="showQuote = false"
+    >
+      Close
+    </button>
+  </div>
+</div>
+
 </template>
 
 <script>
@@ -113,7 +128,16 @@ export default {
       { type: 'pomodoro', name: 'Study', duration: 25 * 60 },
       { type: 'shortBreak', name: 'Short Break', duration: 5 * 60 },
       { type: 'longBreak', name: 'Long Break', duration: 15 * 60 }
-    ]
+    ],
+    quotes: [
+      "You're doing great! 🌟",
+      "Keep going, you've got this!",
+      "One step at a time. 🐾",
+      "Stay focused and believe in yourself!",
+      "Your effort matters, even the small ones!"
+    ],
+    showQuote: false,
+    selectedQuote: ''
   }
 },
   computed: {
@@ -170,6 +194,11 @@ currentPetImage() {
   }
   this.loading = false
 
+},
+showAffirmation() {
+  const randomIndex = Math.floor(Math.random() * this.quotes.length)
+  this.selectedQuote = this.quotes[randomIndex]
+  this.showQuote = true
 },
 async fetchEquippedPet() {
   const token = localStorage.getItem('token')
